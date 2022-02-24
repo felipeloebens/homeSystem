@@ -1,6 +1,7 @@
 const models = require('../models/index');
 const Op = models.Sequelize.Op;
 const Joi = require('joi');
+const bcrypt = require("bcrypt");
 
 class UsersController {
 //função de consulta
@@ -48,14 +49,10 @@ async list(req, res) {
     if (countLevels !== 0) {
     const schema = Joi.object({
       id_level : Joi.number().required(),
-      name: Joi.string()
-        .min(3)
-        .max(30)
-        .required(),
-    pass: Joi.string()
-        .pattern(new RegExp('^[a-zA-Z0-9!@#$%&*]{3,25}$')),
-    repeat_pass: Joi.ref('pass'),
-    email: Joi.string()
+      name: Joi.string().required(),
+      pass: Joi.string().required(),
+      repeat_pass: Joi.ref('pass'),
+      email: Joi.string()
         .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net', 'ind'] },})
     });
 
@@ -75,6 +72,12 @@ async list(req, res) {
         return res.status(500).send(msgError);
   
     } else {
+      // gerar o salt to hash password
+      const salt = await bcrypt.genSalt(10);
+      // define a senha encriptada com hash
+      var passwordEncrypt = await bcrypt.hash(req.body.pass, salt);
+      var dataCreate = req.body;
+      dataCreate.pass = passwordEncrypt
 
       // se o Json é válido realiza rotina de inserção no db
       req.body = value;    
@@ -96,16 +99,13 @@ async list(req, res) {
         });
 
           if (countName === 0 && countEmail === 0) {
-
             try {
-              const data = await models.users.create(req.body);
-              delete data.dataValues.pass;
+              const data = await models.users.create(dataCreate);
               return res.status(200).json(data);
             } catch (error) {
               console.error(error)
               return res.status(500).json(error);
             }
-
           }else if (countName !== 0){
 
             return res.status(500).send(`Validation error: ${"the name is not unique!"}`);
