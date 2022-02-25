@@ -40,7 +40,36 @@ async list(req, res) {
       return res.sendStatus(500);
     }
 }
-  
+
+//função de login
+async login(req, res) {
+  const query = {
+    where: {}
+  }
+
+  //cláusula where por email
+  if (req.body.email) {
+    query.where.email = {
+    [Op.like]: `%${req.body.email.trim()}%`,
+    }
+  }
+
+  const user = await models.users.findOne(query);
+  console.log(user.dataValues.pass);
+
+  if (user) {
+    // verifica se a senha gravada com hashed password está no banco de dados
+    const validPassword = await bcrypt.compare(req.body.pass, user.dataValues.pass);
+    if (validPassword) {
+      return res.status(200).json({ message: "Valid password" });
+    } else {
+      return res.status(400).json({ error: "Invalid Password" });
+    }
+  } else {
+    return res.status(401).json({ error: "User does not exist" });
+  }
+}
+
 //funcao de insert na tabela users
   async create(req, res) {
     //verifica se tem algum level_access
