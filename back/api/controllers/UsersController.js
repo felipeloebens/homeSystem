@@ -1,7 +1,6 @@
 const models = require('../models/index');
 const Op = models.Sequelize.Op;
 const Joi = require('joi');
-const bcrypt = require("bcrypt");
 
 class UsersController {
 //função de consulta
@@ -40,36 +39,7 @@ async list(req, res) {
       return res.sendStatus(500);
     }
 }
-
-//função de login
-async login(req, res) {
-  const query = {
-    where: {}
-  }
-
-  //cláusula where por email
-  if (req.body.email) {
-    query.where.email = {
-    [Op.like]: `%${req.body.email.trim()}%`,
-    }
-  }
-
-  const user = await models.users.findOne(query);
-  console.log(user.dataValues.pass);
-
-  if (user) {
-    // verifica se a senha gravada com hashed password está no banco de dados
-    const validPassword = await bcrypt.compare(req.body.pass, user.dataValues.pass);
-    if (validPassword) {
-      return res.status(200).json({ message: "Valid password" });
-    } else {
-      return res.status(400).json({ error: "Invalid Password" });
-    }
-  } else {
-    return res.status(401).json({ error: "User does not exist" });
-  }
-}
-
+  
 //funcao de insert na tabela users
   async create(req, res) {
     //verifica se tem algum level_access
@@ -78,10 +48,14 @@ async login(req, res) {
     if (countLevels !== 0) {
     const schema = Joi.object({
       id_level : Joi.number().required(),
-      name: Joi.string().required(),
-      pass: Joi.string().required(),
-      repeat_pass: Joi.ref('pass'),
-      email: Joi.string()
+      name: Joi.string()
+        .min(3)
+        .max(30)
+        .required(),
+    pass: Joi.string()
+        .pattern(new RegExp('^[a-zA-Z0-9!@#$%&*]{3,25}$')),
+    repeat_pass: Joi.ref('pass'),
+    email: Joi.string()
         .email({ minDomainSegments: 2, tlds: { allow: ['com', 'net', 'ind'] },})
     });
 
@@ -101,12 +75,6 @@ async login(req, res) {
         return res.status(500).send(msgError);
   
     } else {
-      // gerar o salt to hash password
-      const salt = await bcrypt.genSalt(10);
-      // define a senha encriptada com hash
-      var passwordEncrypt = await bcrypt.hash(req.body.pass, salt);
-      var dataCreate = req.body;
-      dataCreate.pass = passwordEncrypt
 
       // se o Json é válido realiza rotina de inserção no db
       req.body = value;    
@@ -129,7 +97,9 @@ async login(req, res) {
 
           if (countName === 0 && countEmail === 0) {
             try {
-              const data = await models.users.create(dataCreate);
+              const data = await models.users.create(req.body);
+              delete data.dataValues.pass;
+              
               return res.status(200).json(data);
             } catch (error) {
               console.error(error)
