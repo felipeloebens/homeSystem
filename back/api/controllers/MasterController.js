@@ -5,8 +5,11 @@ const Joi = require('joi');
 class MasterController {
   async list(req, res) {
     //exemplo de get com a query http://localhost:8080/api/masters?query&name=plc1
-    const { count : countElements } = await models.masters.findAndCountAll({});
-    if (countElements !== 0) {
+    const data = await models.masters.findAll();
+    if(data.length === 0) {
+      return res.status(500).send(`error: ${"Does not has registers in table!"}`);
+    } 
+
     try {
       const query = {
         where: {}
@@ -32,14 +35,11 @@ class MasterController {
       console.error(error)
       return res.sendStatus(500);
     }
-  }else{
-    return res.status(500).send(`error: ${"Does not has registers in table!"}`);
-  }
-
 }
 
 //função de inserção de um novo master no sistema
   async create(req, res) {
+
     const schema = Joi.object({
       name: Joi.string()
       .alphanum()
@@ -107,17 +107,18 @@ class MasterController {
           console.error(error)
           return res.sendStatus(500);
         }
-
-
     }
-
   }
 
  //função de update da level acesses selecionado
   async update(req, res) {
-    const { count : countElements } = await models.masters.findAndCountAll({});
 
-    if (countElements !== 0) {
+    const data = await models.masters.findAll();
+
+    if(data.length === 0) {
+      return res.status(500).send(`error: ${"Does not has registers in table!"}`);
+    } 
+
     try {
       if (!req.params.id) {
         return res.status(400).send({
@@ -139,18 +140,17 @@ class MasterController {
       console.error(error)
       return res.sendStatus(500);
     }
-  }else{
 
-    return res.status(500).send(`error: ${"Does not has registers in table!"}`);
-  }
 }
 
  //função de exclusão de um master
   async delete(req, res) {
-    
-    const { count : countElements } = await models.masters.findAndCountAll({});
+    const data = await models.masters.findAll();
 
-    if (countElements !== 0) {
+    if(data.length === 0) {
+      return res.status(500).send(`error: ${"Does not has registers in table!"}`);
+    } 
+
     try {
       if (!req.params.id) {
         return res.status(400).send({
@@ -173,11 +173,6 @@ class MasterController {
       console.error(error)
       return res.sendStatus(500);
     }
-  }else{
-
-    return res.status(500).send(`error: ${"Does not has registers in table!"}`);
-  }
-  
   }
 }
 

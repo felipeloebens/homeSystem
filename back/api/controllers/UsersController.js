@@ -42,10 +42,7 @@ async list(req, res) {
   
 //funcao de insert na tabela users
   async create(req, res) {
-    //verifica se tem algum level_access
-    const { count : countLevels } = await models.level_access.findAndCountAll({});
 
-    if (countLevels !== 0) {
     const schema = Joi.object({
       id_level : Joi.number().required(),
       name: Joi.string()
@@ -118,17 +115,18 @@ async list(req, res) {
         return res.sendStatus(500);
       }
     }
-  }else{
 
-    return res.status(500).send(`error: ${"First insert level access fora insert a user in system!"}`);
-  }
  }
 
   //função de update de um user selecionado
   async update(req, res) {
-    const { count : countElements } = await models.users.findAndCountAll({});
+    
+    const data = await models.users.findAll();
 
-    if (countElements !== 0) {
+    if(data.length === 0) {
+      return res.status(500).send(`error: ${"Does not has registers in table!"}`);
+    }
+
     try {
       if (!req.params.id) {
         return res.status(400).send({
@@ -151,17 +149,19 @@ async list(req, res) {
       console.error(error)
       return res.sendStatus(500);
     }
-  }else{
 
-    return res.status(500).send(`error: ${"Does not has registers in table!"}`);
-  }
 }
 
 //função de exclusão de um level access
 async delete(req, res) {
-  const { count : countElements } = await models.users.findAndCountAll({});
-  if (countElements !== 0) {
-    try {
+
+  const data = await models.users.findAll();
+
+  if(data.length === 0) {
+    return res.status(500).send(`error: ${"Does not has registers in table!"}`);
+  }
+
+  try {
         if (!req.params.id) {
           return res.status(400).send({
             message: "Send the id parameter."
@@ -180,9 +180,7 @@ async delete(req, res) {
       console.error(error)
       return res.sendStatus(500);
     }
-  }else{
-    return res.status(500).send(`error: ${"Does not has registers in table!"}`);
-  }
+
   }
 
 

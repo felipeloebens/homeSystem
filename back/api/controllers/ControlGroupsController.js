@@ -5,8 +5,10 @@ const Joi = require('joi');
 class ControlGroups {
 //função de consulta
 async list(req, res) {
-  const { count : countElements } = await models.control_groups.findAndCountAll({});
-  if (countElements !== 0) {
+  const data = await models.control_groups.findAll();
+  if(data.length === 0) {
+    return res.status(500).send(`error: ${"Does not has registers in table!"}`);
+  } 
     try {
       //exemplo de get com a query http://localhost:8080/api/controlGroups?query&ids=1,2
       const query = {
@@ -29,9 +31,6 @@ async list(req, res) {
         console.error(error)
         return res.sendStatus(500);
       }
-    }else{
-      return res.status(500).send(`error: ${"Does not has registers in table!"}`);
-  }
 }
 
 //função para inserção de um novo control group
@@ -104,9 +103,11 @@ async list(req, res) {
 
  //função de update da level acesses selecionado
  async update(req, res) {
-  const { count : countElements } = await models.control_groups.findAndCountAll({});
+  const data = await models.control_groups.findAll();
+  if(data.length === 0) {
+    return res.status(500).send(`error: ${"Does not has registers in table!"}`);
+  } 
 
-  if (countElements !== 0) {
   try {
     if (!req.params.id) {
       return res.status(400).send({
@@ -129,18 +130,16 @@ async list(req, res) {
     console.error(error)
     return res.sendStatus(500);
   }
-}else{
-
-  return res.status(500).send(`error: ${"Does not has registers in table!"}`);
-}
 }
 
 //função de exclusão de um control group
  async delete(req, res) {
-  const { count : countElements } = await models.control_groups.findAndCountAll({});
+  const data = await models.control_groups.findAll();
+  if(data.length === 0) {
+    return res.status(500).send(`error: ${"Does not has registers in table!"}`);
+  } 
 
-  if (countElements !== 0) {
-    try {
+  try {
       if (!req.params.id) {
         return res.status(400).send({
           message: "Send the id parameter."
@@ -162,12 +161,7 @@ async list(req, res) {
       console.error(error)
       return res.sendStatus(500);
     }
-
-  }else{
-    return res.status(500).send(`error: ${"Does not has register in table!"}`);
-  }
 }
-
 
 }
 module.exports = new ControlGroups()

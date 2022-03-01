@@ -7,8 +7,10 @@ class LevelAccessController {
 
 //função de consulta
 async list(req, res) {
-  const { count : countElements } = await models.level_access.findAndCountAll({});
-  if (countElements !== 0) {
+  const data = await models.level_access.findAll();
+  if(data.length === 0) {
+    return res.status(500).send(`error: ${"Does not has registers in table!"}`);
+  } 
     try {
       //exemplo de get com a query http://localhost:8080/api/levelAccess?query&ids=1,2
       const query = {
@@ -31,17 +33,14 @@ async list(req, res) {
         console.error(error)
         return res.sendStatus(500);
       }
-    }else{
-      return res.status(500).send(`error: ${"Does not has registers in table!"}`);
-  }
 }
 
 //função de update da level accesses selecionado
 async update(req, res) {
-
-  const { count : countElements } = await models.level_access.findAndCountAll({});
-
-  if (countElements !== 0) {
+  const data = await models.level_access.findAll();
+  if(data.length === 0) {
+    return res.status(500).send(`error: ${"Does not has registers in table!"}`);
+  } 
     try {
       if (!req.params.id) {
         return res.status(400).send({
@@ -64,9 +63,6 @@ async update(req, res) {
       console.error(error)
       return res.sendStatus(500);
     }
-  }else{
-    return res.status(500).send(`error: ${"Does not has registers in table!"}`);
-  }
 }
 
 //função de de inserção de um level access
@@ -131,8 +127,10 @@ async create(req, res) {
 
 //função de exclusão de um level access
 async delete(req, res) {
-  const { count : countElements } = await models.level_access.findAndCountAll({});
-  if (countElements !== 0) {
+  const data = await models.level_access.findAll();
+  if(data.length === 0) {
+    return res.status(500).send(`error: ${"Does not has registers in table!"}`);
+  } 
     try {
         if (!req.params.id) {
           return res.status(400).send({
@@ -152,12 +150,7 @@ async delete(req, res) {
       console.error(error)
       return res.sendStatus(500);
     }
-  }else{
-    return res.status(500).send(`error: ${"Does not has registers in table!"}`);
   }
-  }
-
-
 }
 
 module.exports = new LevelAccessController()

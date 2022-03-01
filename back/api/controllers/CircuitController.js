@@ -5,12 +5,14 @@ const Joi = require('joi');
 class CircuitController {
 //função de consulta
 async list(req, res) {
-  const { count : countElements } = await models.circuits.findAndCountAll({});
-  if (countElements !== 0) {
+  const data = await models.circuits.findAll();
+  if(data.length === 0) {
+    return res.status(500).send(`error: ${"Does not has registers in table!"}`);
+  } 
     try {
       //exemplo de get com a query http://localhost:8080/api/circuits?query&ids=1,2
       const query = {
-          where: {}
+      where: {}
         }
         //cláusula where por ID
         if (req.query.ids) {
@@ -35,9 +37,6 @@ async list(req, res) {
         console.error(error)
         return res.sendStatus(500);
       }
-    }else{
-      return res.status(500).send(`error: ${"Does not has registers in table!"}`);
-  }
 }
 
 //função de inserção de um novo circuit no sistema
@@ -119,9 +118,10 @@ async list(req, res) {
 
   //função de update de um circuit selecionado
  async update(req, res) {
-  const { count : countElements } = await models.circuits.findAndCountAll({});
-
-  if (countElements !== 0) {
+  const data = await models.circuits.findAll();
+  if(data.length === 0) {
+    return res.status(500).send(`error: ${"Does not has registers in table!"}`);
+  } 
   try {
     if (!req.params.id) {
       return res.status(400).send({
@@ -144,17 +144,14 @@ async list(req, res) {
     console.error(error)
     return res.sendStatus(500);
   }
-}else{
-
-  return res.status(500).send(`error: ${"Does not has registers in table!"}`);
-}
 }
 
 //função de exclusão de um circuit
 async delete(req, res) {
-  const { count : countElements } = await models.circuits.findAndCountAll({});
-
-  if (countElements !== 0) {
+  const data = await models.circuits.findAll();
+  if(data.length === 0) {
+    return res.status(500).send(`error: ${"Does not has registers in table!"}`);
+  } 
     try {
       if (!req.params.id) {
         return res.status(400).send({
@@ -169,7 +166,6 @@ async delete(req, res) {
           message: "Master not found."
         });
       }
-
       await models.circuits.destroy({ where: { id: circuitId } });
       return res.status(201).json({message: "Success delete!"});
 
@@ -177,10 +173,6 @@ async delete(req, res) {
       console.error(error)
       return res.sendStatus(500);
     }
-
-  }else{
-    return res.status(500).send(`error: ${"Does not has register in table!"}`);
-  }
 }
 
 

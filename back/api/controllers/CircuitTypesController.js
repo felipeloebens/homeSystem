@@ -5,8 +5,10 @@ const Joi = require('joi');
 class CircuitTypesController {
 //função de consulta
 async list(req, res) {
-  const { count : countElements } = await models.circuit_types.findAndCountAll({});
-  if (countElements !== 0) {
+  const data = await models.circuit_types.findAll();
+  if(data.length === 0) {
+    return res.status(500).send(`error: ${"Does not has registers in table!"}`);
+  } 
     try {
       //exemplo de get com a query http://localhost:8080/api/controlGroups?query&ids=1,2
       const query = {
@@ -29,9 +31,6 @@ async list(req, res) {
         console.error(error)
         return res.sendStatus(500);
       }
-    }else{
-      return res.status(500).send(`error: ${"Does not has registers in table!"}`);
-  }
 }
 
 //função para inserção de um circuit type
@@ -92,17 +91,15 @@ async create(req, res) {
           console.error(error)
           return res.sendStatus(500);
         }
-
-
     }
-
   }
 
 //função de update de um circuit type
 async update(req, res) {
-  const { count : countElements } = await models.circuit_types.findAndCountAll({});
-
-  if (countElements !== 0) {
+  const data = await models.circuit_types.findAll();
+  if(data.length === 0) {
+    return res.status(500).send(`error: ${"Does not has registers in table!"}`);
+  }
   try {
     if (!req.params.id) {
       return res.status(400).send({
@@ -125,17 +122,14 @@ async update(req, res) {
     console.error(error)
     return res.sendStatus(500);
   }
-}else{
-
-  return res.status(500).send(`error: ${"Does not has registers in table!"}`);
-}
 }
 
 //função de exclusão de um circuit type
 async delete(req, res) {
-  const { count : countElements } = await models.circuit_types.findAndCountAll({});
-
-  if (countElements !== 0) {
+  const data = await models.circuit_types.findAll();
+  if(data.length === 0) {
+    return res.status(500).send(`error: ${"Does not has registers in table!"}`);
+  }
     try {
       if (!req.params.id) {
         return res.status(400).send({
@@ -158,10 +152,6 @@ async delete(req, res) {
       console.error(error)
       return res.sendStatus(500);
     }
-
-  }else{
-    return res.status(500).send(`error: ${"Does not has register in table!"}`);
-  }
 }
 
 }
